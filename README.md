@@ -10,9 +10,9 @@ This means if I call a script with dofile, I always use .lc ... just keep in min
 ## Depencies
 Most of the time, I work with NodeMCU firmware from master branch at github.
 There is a handy online firmware build service at [frightanic.com](http://frightanic.com/nodemcu-custom-build).
-Do not forget to include the neaded modules for your project. eg adc, dth11, ...
+Do not forget to include the needed modules for your project. eg adc, dth11, ...
 
-## wificonfig.lua
+## wifisetup.lua
 What it does:
 * configure wifi for Station mode
 * try to start up Station mode
