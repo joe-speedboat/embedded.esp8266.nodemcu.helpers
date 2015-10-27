@@ -1,27 +1,21 @@
 
--- read wifi config file and load vars and start wifi in station mode 
+-- wifi config vars
 local cfg = {}
 local wlan = {}
-file.open("wlan.cfg", "r")
-repeat 
-   cfg.line = file.readline()
-   cfg.line = string.sub(cfg.line, 1, -2) --remove line break chars
-   if string.find(cfg.line, '=') then
-      cfg.var = string.gsub(cfg.line, '=.*', '', 1)
-      cfg.val = string.gsub(cfg.line, '.*=', '', 1)
-      wlan[cfg.var]=cfg.val
-      print("wlan."..cfg.var.." = "..cfg.val)
-   end
-until not string.find(cfg.line, '=')
-file.close()
+
+wlan.ssid = "MYWLAN"
+wlan.pw = "secret3"
+wlan.dns2 = 8.8.4.4 -- fallback dns server
+
+-- wlan.ip = 192.168.1.101
+-- wlan.netmask = 255.255.255.0
+-- wlan.gateway = 192.168.1.254
+-- wlan.dns = 8.8.8.8
 
 -- start wifi in station mode 
-if not wlan.ssid then wlan.ssid = "ESP-"..node.chipid() end
-if not wlan.pw then wlan.pw = "" end
-SSID = wlan.ssid
 wifi.setmode(1)
 wifi.sta.config(wlan.ssid, wlan.pw, 1)
-if wlan.ip then 
+if wlan.ip then -- if static ip is set
    print("Set Static IP: "..wlan.ip)
    cfg = { ip=wlan.ip, netmask=wlan.netmask, gateway=wlan.gateway }
    wifi.sta.setip(cfg)
@@ -29,25 +23,17 @@ if wlan.ip then
 end
 
 -- check if station mode succeeded or fallback to AP mode 
-tmr.alarm(0, 10000, 0, function() -- wait 10 second to join WiFi
+tmr.alarm(0, 6000, 0, function() -- wait 6 second to join WiFi
    if not wifi.sta.getip() then
-      print('WiFi station mode not succeeded after 10 seconds, starting AP Mode now') -- falling back to AP mode -------
+      print('WiFi station mode not succeeded after 6 seconds, starting AP Mode now') -- falling back to AP mode
       wifi.setmode(2)
       cfg={}
       cfg.ssid="ESP-"..node.chipid()
       wifi.ap.config(cfg)
-      SSID = cfg.ssid
-      print("webtime.lc is disabled because no default gateway is present")
-      mytime = {} -- emulate zero time to avoid nil error msg
-      mytime.hh = 0
-      mytime.mm = 0
-      mytime.ss = 0
-      mytime.wkdayn = 0
-      dofile("httpserver.lc")(80)   
+      dofile("telnet-server.lc")
    else 
-      net.dns.setdnsserver("8.8.4.4", 1) -- set secondary dns for safety
-      dofile("webtime.lc")
-      dofile("httpserver.lc")(80)    
+      net.dns.setdnsserver(wlan.dns2, 1) -- set secondary dns for safety
+      dofile("main-prog.lc")
    end
 end)
 
