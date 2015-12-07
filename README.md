@@ -16,6 +16,6 @@ Do not forget to include the needed modules for your project. eg adc, dth11, ...
 What it does:
 * configure wifi for Station mode
 * try to start up Station mode
-* if Station mode not startet after 6 seconds, fallback to AP mode
+* if Station mode not suceeded after 10 seconds, fallback to AP mode
 * start different scripts for Station or AP mode
 
